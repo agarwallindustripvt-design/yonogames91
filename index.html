@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080b12">
+  <title>Mobile Security Alert</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      color: #e9eef7;
+      background: radial-gradient(
+        ellipse at 50% 18%,
+        #58111d 0,
+        #260d18 27%,
+        #100b13 61%,
+        #040509 100%
+      );
+      background-size: 150% 150%;
+      animation: bloodGlow 5s ease-in-out infinite alternate;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      z-index: 0;
+      inset: 0;
+      pointer-events: none;
+      opacity: .17;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent 0 3px,
+        #ff39441c 4px 5px
+      );
+      animation: scanFlicker .16s steps(2) infinite;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      z-index: 0;
+      inset: -8%;
+      pointer-events: none;
+      opacity: .32;
+      background:
+        radial-gradient(ellipse at 8% 52%, #e5153024 0, transparent 34%),
+        radial-gradient(ellipse at 92% 42%, #b3092522 0, transparent 32%);
+      animation: shadowDrift 7s ease-in-out infinite alternate;
+    }
+
+    main {
+      z-index: 1;
+      position: relative;
+      width: min(100%, 560px);
+      padding: clamp(26px, 7vw, 48px);
+      border: 1px solid #74313d;
+      border-radius: 24px;
+      background: rgba(12, 8, 15, .95);
+      box-shadow: 0 24px 90px #000d, 0 0 65px #c40e292b;
+      text-align: center;
+    }
+
+    .brand {
+      margin: 0 0 20px;
+      color: #f4c7cb;
+      font-size: .78rem;
+      font-weight: 750;
+      letter-spacing: .24em;
+      text-transform: uppercase;
+    }
+
+    .warning-symbol {
+      margin: 4px 0 12px;
+      color: #ff3648;
+      font-size: 4.5rem;
+      font-weight: 900;
+      line-height: 1;
+      text-shadow: 0 0 10px #ff253d, 0 0 34px #e0003388;
+      animation: flicker 1.4s infinite;
+    }
+
+    .badge {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 12px;
+      border: 1px solid #493136;
+      border-radius: 999px;
+      color: #ff8b8b;
+      background: #251519;
+      font-size: .78rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ff555d;
+      box-shadow: 0 0 14px #ff555d;
+      animation: pulse 1s infinite;
+    }
+
+    h1 {
+      margin: 26px 0 12px;
+      font-size: clamp(2rem, 8vw, 3.2rem);
+      line-height: 1.05;
+      letter-spacing: -.045em;
+    }
+
+    .warning {
+      color: #ff626a;
+      text-shadow: 0 0 22px #ff243a88;
+      animation: flicker 2.2s infinite;
+    }
+
+    p {
+      color: #aeb8c8;
+      line-height: 1.65;
+    }
+
+    .meter {
+      height: 7px;
+      margin: 30px 0 10px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: #202938;
+    }
+
+    .meter span {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #ff343f, #ffae62);
+      animation: scan 20s ease-out forwards;
+    }
+
+    #status {
+      min-height: 1.5em;
+      color: #ff999d;
+      font-size: .9rem;
+    }
+
+    .terminal {
+      margin: 22px 0 0;
+      padding: 14px 16px;
+      border: 1px solid #38262e;
+      border-radius: 12px;
+      background: #090b10;
+      text-align: left;
+      color: #d07880;
+      font: 12px/1.8 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    .terminal div::before {
+      content: "> ";
+      color: #ff5967;
+    }
+
+    .terminal div {
+      min-height: 1.8em;
+    }
+
+    .money-demo {
+      margin-top: 14px;
+      padding: 16px 12px;
+      border: 1px solid #6b542c;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #211a0e, #13110d);
+      color: #ffd078;
+      font-weight: 800;
+      font-size: clamp(2rem, 10vw, 3.25rem);
+      letter-spacing: -.04em;
+      text-shadow: 0 0 22px #ffb93345;
+    }
+
+    .money-demo small {
+      display: block;
+      margin-bottom: 7px;
+      color: #c4a76a;
+      font-size: .62rem;
+      font-weight: 650;
+      letter-spacing: .14em;
+      text-shadow: none;
+    }
+
+    .countdown {
+      width: 82px;
+      height: 82px;
+      margin: 14px auto 0;
+      display: grid;
+      place-items: center;
+      border: 3px solid #ff424f;
+      border-radius: 50%;
+      background: radial-gradient(circle, #42121b 0, #1a0c12 68%);
+      color: #ff9297;
+      font: 800 1.7rem ui-monospace, monospace;
+      box-shadow:
+        0 0 12px #ff343f99,
+        0 0 32px #ff172f66,
+        inset 0 0 20px #ff343f55;
+      animation: alarmPulse .7s ease-in-out infinite;
+    }
+
+    .reveal {
+      display: none;
+      margin-top: 28px;
+      padding: 20px;
+      border: 1px solid #28513e;
+      border-radius: 16px;
+      background: #102119;
+      animation: appear .5s ease-out both;
+    }
+
+    .reveal h2 {
+      margin: 0 0 8px;
+      color: #7ce0a5;
+      font-size: 1.35rem;
+    }
+
+    .reveal p {
+      margin: 0;
+      color: #c3d9cb;
+    }
+
+    .apology {
+      margin: 18px 0 0;
+      color: #ff404f;
+      font-size: 1.05rem;
+      font-weight: 900;
+      letter-spacing: .09em;
+      text-shadow: 0 0 7px #ff263b, 0 0 22px #d8002688;
+    }
+
+    button {
+      margin-top: 22px;
+      padding: 12px 18px;
+      border: 1px solid #354254;
+      border-radius: 10px;
+      color: #e9eef7;
+      background: #182230;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #222f40;
+    }
+
+    footer {
+      margin-top: 28px;
+      color: #758195;
+      font-size: .78rem;
+    }
+
+    @keyframes pulse {
+      50% { opacity: .35; }
+    }
+
+    @keyframes flicker {
+      0%, 90%, 94%, 100% { opacity: 1; }
+      92%, 96% { opacity: .58; }
+    }
+
+    @keyframes alarmPulse {
+      50% {
+        opacity: .7;
+        transform: scale(1.07);
+        box-shadow:
+          0 0 20px #ff343f,
+          0 0 46px #ff172f99,
+          inset 0 0 26px #ff343f88;
+      }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-3px); }
+      75% { transform: translateX(3px); }
+    }
+
+    @keyframes bloodGlow {
+      to { background-position: 100% 65%; }
+    }
+
+    @keyframes scanFlicker {
+      50% { opacity: .1; }
+    }
+
+    @keyframes shadowDrift {
+      to {
+        transform: translate3d(1.5%, -1%, 0) scale(1.04);
+        opacity: .58;
+      }
+    }
+
+    @keyframes scan {
+      to { width: 100%; }
+    }
+
+    @keyframes appear {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main aria-live="polite">
+    <div class="brand">AGARWALL • DEVICE SECURITY</div>
+    <div class="warning-symbol" role="img" aria-label="Warning">⚠</div>
+    <div class="badge">
+      <span class="dot" aria-hidden="true"></span>
+      Security notification
+    </div>
+
+    <h1 id="headline"><span class="warning">Mobile hacked!</span></h1>
+    <p id="message">Device scan in progress…</p>
+
+    <div class="meter" aria-hidden="true"><span></span></div>
+    <div id="status">Checking system…</div>
+
+    <div class="terminal" aria-hidden="true">
+      <div id="log1">Initializing secure scan</div>
+      <div id="log2">Waiting for device response</div>
+      <div id="log3">No personal data is being accessed</div>
+
+      <div class="money-demo">
+        <small>SIMULATION • ASLI PAISA NAHI</small>
+        <span id="money">₹1,000</span>
+      </div>
+
+      <div class="countdown" id="countdown">1</div>
+    </div>
+
+    <section class="reveal" id="reveal">
+      <h2> your mobile is dumb .</h2>
+      <p>
+        Aapka mobile hack hua. Is page ne camera, location,
+        contacts, ya files access  kiya.
+      </p>
+    </section>
+
+    <p class="apology">DUM HAI TOH BACK KARO</p>
+
+    <button id="replay" type="button" hidden>
+      haick succesfully
+    </button>
+
+    <footer>
+      AGARWAL  •  data collect ya send prosess hota •
+      Aap page kabhi bhi band nhi kar sakte hain
+    </footer>
+  </main>
+
+  <script>
+    const statusLine = document.querySelector("#status");
+    const reveal = document.querySelector("#reveal");
+    const replay = document.querySelector("#replay");
+
+    const messages = [
+      "Checking system…",
+      "Unusual activity detected…",
+      "Unknown signal detected…",
+      "Running final security check…"
+    ];
+
+    const logLines = [
+      [
+        "Checking connection",
+        "Analyzing device status",
+        "Preparing security report"
+      ],
+      [
+        "Warning: suspicious activity (simulated)",
+        "Reviewing demo scan results",
+        " files or personal data accessed"
+      ],
+      [
+        "Unknown signal (simulated)",
+        "No connection to this device",
+        "All scan messages are pretend"
+      ],
+      [
+        "Finalizing harmless HAICK",
+        "changes made to this device",
+        " reveal incoming"
+      ]
+    ];
+
+    let timers = [];
+
+    function playPrank() {
+      timers.forEach(clearTimeout);
+      timers = [];
+
+      reveal.style.display = "none";
+      replay.hidden = true;
+      statusLine.textContent = messages[0];
+
+      document.querySelector("main").style.animation = "none";
+      document.querySelector("#countdown").textContent = "1";
+      document.querySelector("#countdown").style.animation = "";
+      document.querySelector("#money").textContent = "₹1,000";
+
+      ["log1", "log2", "log3"].forEach((id, index) => {
+        document.getElementById(id).textContent = logLines[0][index];
+      });
+
+      const progressBar = document.querySelector(".meter span");
+      progressBar.style.animation = "none";
+      void progressBar.offsetWidth;
+      progressBar.style.animation = "";
+
+      messages.slice(1).forEach((message, index) => {
+        timers.push(setTimeout(() => {
+          statusLine.textContent = message;
+
+          ["log1", "log2", "log3"].forEach((id, logIndex) => {
+            document.getElementById(id).textContent =
+              logLines[index + 1][logIndex];
+          });
+
+          document.querySelector("main").style.animation =
+            "shake .18s linear 2";
+        }, (index + 1) * 5000));
+      });
+
+      let seconds = 20;
+      let timerValue = 1;
+
+      function tick() {
+        seconds -= 1;
+
+        if (seconds > 0) {
+          timerValue = timerValue % 3 + 1;
+          document.querySelector("#countdown").textContent =
+            String(timerValue);
+          timers.push(setTimeout(tick, 1000));
+        }
+      }
+
+      timers.push(setTimeout(tick, 1000));
+
+      for (let step = 1; step <= 6; step += 1) {
+        timers.push(setTimeout(() => {
+          const amount = 1000 * (8 ** step);
+          document.querySelector("#money").textContent =
+            `₹${amount.toLocaleString("en-IN")}`;
+        }, step * 3000));
+      }
+
+      timers.push(setTimeout(() => {
+        statusLine.textContent = "HAIK complete";
+        reveal.style.display = "block";
+        replay.hidden = false;
+        document.querySelector("#countdown").textContent = "DONE";
+        document.querySelector("#countdown").style.animation = "none";
+      }, 20000));
+    }
+  </script>
+</body>
+</html>
